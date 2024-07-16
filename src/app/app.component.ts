@@ -8,21 +8,24 @@ import { MatDialog } from '@angular/material/dialog';
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
 })
-export class AppComponent implements OnInit{
+export class AppComponent implements OnInit {
   emailForm: FormGroup;
   dataForm: FormGroup;
-  emailPlaceholder: string = "Test Email";
-  emailLabel: string = "Test Email";
-  mailThrouth: string = "alibaba";
+  emailPlaceholder: string = 'Test Email';
+  emailLabel: string = 'Test Email';
+  mailThrouth: string = 'alibaba';
   selectedFile: File | null = null;
   fileSelected = false;
+  dataFiles: any[] = [];
 
-  constructor(private fb: FormBuilder, 
-              private emailService: EmailService,
-              private notificationService: NotificationService,
-              public dialog: MatDialog) {
+  constructor(
+    private fb: FormBuilder,
+    private emailService: EmailService,
+    private notificationService: NotificationService,
+    public dialog: MatDialog
+  ) {
     this.emailForm = this.fb.group({
       fromEmail: ['', [Validators.required, Validators.email]],
       subject: ['', Validators.required],
@@ -40,20 +43,22 @@ export class AppComponent implements OnInit{
       limitToSend: [30],
       sleepyTime: [0],
       zone: ['SINGAPORE'],
-      emailThrough: ['', Validators.required]
+      emailThrough: ['', Validators.required],
     });
 
     this.dataForm = this.fb.group({
       csvFile: [null],
-      additionalData: ['']
+      blobUrls: [''],
+      separationCount: ['', Validators.required],
+      tempFile: ['', Validators.required],
+      tempFileName: [''],
     });
-    
   }
   ngOnInit(): void {
-    this.emailForm.get('emailType')?.valueChanges.subscribe(value => {
+    this.emailForm.get('emailType')?.valueChanges.subscribe((value) => {
       this.updateEmailField(value);
     });
-    this.emailForm.get('emailThrough')?.valueChanges.subscribe(value => {
+    this.emailForm.get('emailThrough')?.valueChanges.subscribe((value) => {
       this.mailThrouth = value;
     });
   }
@@ -62,27 +67,27 @@ export class AppComponent implements OnInit{
     if (this.emailForm.valid) {
       const formValue = this.emailForm.value;
       // if(this.emailPlaceholder === 'Bulk Email'){
-      //   formValue.bulkEmail = formValue.bulkEmail.split(',').map((email: string) => email.trim()); 
+      //   formValue.bulkEmail = formValue.bulkEmail.split(',').map((email: string) => email.trim());
       // }
-      if(this.mailThrouth === 'sendGrid'){
-      this.emailService.sendEmailThroughSendGrid(formValue).subscribe({
-        next: (message: any) => {
-          this.notificationService.showSuccess(message);
-        },
-        error: (errorMessage: any) => {
-          this.notificationService.showError(errorMessage.error.text);
-        }
-      });
-    }else if(this.mailThrouth === 'alibaba'){
-      this.emailService.sendEmailThroughAlibaba(formValue).subscribe({
-        next: (message: any) => {
-          this.notificationService.showSuccess(message);
-        },
-        error: (errorMessage: any) => {
-          this.notificationService.showError(errorMessage.error.text);
-        }
-      });
-    }
+      if (this.mailThrouth === 'sendGrid') {
+        this.emailService.sendEmailThroughSendGrid(formValue).subscribe({
+          next: (message: any) => {
+            this.notificationService.showSuccess(message);
+          },
+          error: (errorMessage: any) => {
+            this.notificationService.showError(errorMessage.error.text);
+          },
+        });
+      } else if (this.mailThrouth === 'alibaba') {
+        this.emailService.sendEmailThroughAlibaba(formValue).subscribe({
+          next: (message: any) => {
+            this.notificationService.showSuccess(message);
+          },
+          error: (errorMessage: any) => {
+            this.notificationService.showError(errorMessage.error.text);
+          },
+        });
+      }
     } else {
       this.notificationService.showError('Please fill out the form correctly.');
     }
@@ -119,7 +124,7 @@ export class AppComponent implements OnInit{
   openPreview(): void {
     const dialogRef = this.dialog.open(EmailPreviewDialogComponent, {
       width: '600px',
-      data: { body: this.emailForm.get('body')?.value }
+      data: { body: this.emailForm.get('body')?.value },
     });
   }
 
@@ -137,10 +142,40 @@ export class AppComponent implements OnInit{
   }
 
   uploadFile() {
-    if (this.selectedFile) {
-      // Your file upload logic here
-      console.log('File uploaded:', this.selectedFile.name);
+    if (this.selectedFile && this.dataForm.get('separationCount')?.value) {
+      const formData = new FormData();
+      formData.append('file', this.selectedFile);
+      formData.append(
+        'separationCount',
+        this.dataForm.get('separationCount')?.value
+      );
+      this.emailService.uploadDataFile(formData).subscribe((data) => {
+        this.notificationService.showSuccess('Data uploaded successfully.');
+      });
+    } else {
+      this.notificationService.showError('Please fill Separation Count field');
     }
   }
 
+  getBlobFiles() {
+    this.emailService.getFiles().subscribe((obj) => {
+      this.dataFiles = obj;
+      const formattedBlobUrls = this.dataFiles.join('\n');
+      this.dataForm.controls['blobUrls'].setValue(formattedBlobUrls);
+    });
+  }
+
+  createTempFile() {
+    const tempFile = this.dataForm.get('tempFile')?.value;
+    if (tempFile) {
+      // const formData = new FormData();
+      // formData.append('blobUrl', tempFile);
+      this.emailService.createTempFile(tempFile).subscribe((data) => {
+        this.dataForm.controls['tempFileName'].setValue(data);
+        this.notificationService.showSuccess('Temp File created successfully.');
+      });
+    } else {
+      this.notificationService.showError('Please fill Temp File field');
+    }
+  }
 }

@@ -1,52 +1,57 @@
 .container {
-    display: flex;
-    justify-content: center;
-    margin-top: 20px;
-  }
-  
-  .main-card {
-    width: 50%;
-  }
-  
-  .full-width {
-    width: 100%;
-  }
-  
-  .row {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .col {
-    flex: 1;
-    margin-right: 10px;
-  }
-  
-  .col:last-child {
-    margin-right: 0;
-  }
-  
-  .button-group {
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-  }
-  
-  .toolbar-title {
-    margin: 0 auto;
-  }
+  margin-top: 20px;
+}
 
-  .body-preview-container {
-    display: flex;
-    align-items: center;
-  }
-  
-  .file-input-container {
-    display: flex;
-    align-items: center;
-    margin-bottom: 16px;
-  }
-  
-  .file-upload-label {
-    margin-right: 8px;
-  }
+.main-card {
+  width: 50%;
+}
+
+.full-width {
+  width: 100%;
+}
+
+.row {
+  display: flex;
+  justify-content: space-between;
+}
+
+.col {
+  flex: 1;
+  margin-right: 10px;
+}
+
+.col:last-child {
+  margin-right: 0;
+}
+
+.button-group {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 20px;
+}
+
+.toolbar-title {
+  margin: 0 auto;
+}
+
+.body-preview-container {
+  display: flex;
+  align-items: center;
+}
+
+.file-input-container {
+  display: flex;
+  align-items: center;
+  margin-bottom: 16px;
+}
+
+.file-upload-label {
+  margin-right: 8px;
+}
+
+.p-2p {
+  padding: 2%;
+}
+.mb-20px {
+  margin-bottom: 20px;
+}
